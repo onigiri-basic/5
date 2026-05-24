@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Успешно!</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .credentials-box {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+            border: 2px solid #0284c7;
+        }
+        .credentials-box h3 {
+            color: #0369a1;
+            margin-bottom: 1rem;
+        }
+        .credential-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-family: monospace;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .credential-label {
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+        .copy-btn {
+            background: #0284c7;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .copy-btn:hover {
+            background: #0369a1;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="result-card success">
+            <div class="result-icon">✅</div>
+            <h1>Данные успешно сохранены!</h1>
+            
+            <div id="credentialsSection" style="display: none;">
+                <div class="credentials-box">
+                    <h3>🔐 Ваши учетные данные для входа</h3>
+                    <div class="credential-item">
+                        <span class="credential-label">📝 Логин:</span>
+                        <span id="generatedLogin"></span>
+                        <button class="copy-btn" onclick="copyToClipboard('generatedLogin')">Копировать</button>
+                    </div>
+                    <div class="credential-item">
+                        <span class="credential-label">🔒 Пароль:</span>
+                        <span id="generatedPassword"></span>
+                        <button class="copy-btn" onclick="copyToClipboard('generatedPassword')">Копировать</button>
+                    </div>
+                    <div class="warning">
+                        ⚠️ <strong>Важно!</strong> Сохраните эти данные. Они будут показаны только один раз.
+                        Используйте их для входа в систему и редактирования анкеты.
+                    </div>
+                </div>
+            </div>
+            
+            <p>Ваша анкета была успешно обработана и сохранена в базу данных.</p>
+            
+            <div class="result-details">
+                <h2>Что дальше?</h2>
+                <p>Вы можете <a href="login.php" style="color: #3b82f6;">войти в систему</a> с полученными логином и паролем для редактирования данных.</p>
+                <p>Для заполнения новой анкеты используйте <a href="index.php" style="color: #3b82f6;">форму регистрации</a>.</p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="login.php" class="back-btn" style="background: linear-gradient(95deg, #1e3a5f, #0f2b44); text-decoration: none;">🔐 Войти</a>
+                <a href="index.php" class="back-btn" style="background: #6c757d; text-decoration: none;">📝 Новая анкета</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Получаем данные из URL параметров
+        const urlParams = new URLSearchParams(window.location.search);
+        const isFirstTime = urlParams.get('first_time');
+        const isUpdated = urlParams.get('updated');
+        
+        if (isFirstTime === '1') {
+            // Пытаемся получить данные из сессии через AJAX
+            fetch('get_credentials.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.login && data.password) {
+                        document.getElementById('credentialsSection').style.display = 'block';
+                        document.getElementById('generatedLogin').textContent = data.login;
+                        document.getElementById('generatedPassword').textContent = data.password;
+                    }
+                });
+        } else if (isUpdated === '1') {
+            document.querySelector('.result-card h1').textContent = 'Данные обновлены!';
+            document.querySelector('.result-card p').innerHTML = 'Ваша анкета была успешно обновлена.';
+        }
+        
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Скопировано в буфер обмена!');
+            });
+        }
+    </script>
+</body>
+</html>
