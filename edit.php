@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['application_id'])) {
 $host = 'localhost';
 $dbname = 'u82671';
 $username = 'u82671';
-$password = '126650';
+$password = '1266050';
 
 try {
     $pdo = new PDO(
