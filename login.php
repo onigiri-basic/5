@@ -19,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Подключение к БД
         $host = 'localhost';
-        $dbname = 'u82814';
-        $username = 'u82814';
-        $password_db = '3096918';
+        $dbname = 'u82671';
+        $username = 'u82671';
+        $password_db = '1266050';
         
         try {
             $pdo = new PDO(
