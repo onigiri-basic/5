@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кибербезопасность | Детальный аудит веб-приложения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0c10;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+            line-height: 1.5;
+            color: #e6edf4;
+        }
+
+        /* Современный контейнер с неон-акцентами */
+        .report-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: #0f1219;
+            border-radius: 2rem;
+            box-shadow: 0 30px 45px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 255, 255, 0.08);
+            overflow: hidden;
+            backdrop-filter: blur(0px);
+        }
+
+        /* Хедер с технологичным градиентом */
+        .report-header {
+            background: radial-gradient(circle at 20% 30%, #111827, #03060c);
+            border-bottom: 1px solid #1e2a3e;
+            padding: 2.5rem 2.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .report-header:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffcc, #2b59ff, #00ffcc);
+        }
+
+        .report-header h1 {
+            font-size: 2.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #86b3ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .report-header .subtitle {
+            color: #8e9aaf;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .score {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 255, 179, 0.12);
+            border: 1px solid #00ffb3;
+            padding: 0.6rem 1.8rem;
+            border-radius: 3rem;
+            margin-top: 1.5rem;
+            font-weight: 600;
+            color: #9efff0;
+            font-size: 1rem;
+        }
+
+        /* Навигация — минималистичная */
+        .report-nav {
+            background: #0b0e16;
+            padding: 0.75rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid #1e2a3a;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .report-nav a {
+            color: #b9c7d9;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            letter-spacing: 0.2px;
+        }
+
+        .report-nav a:hover {
+            background: #1a2538;
+            color: #7df9ff;
+        }
+
+        .report-content {
+            padding: 2rem 2.5rem;
+        }
+
+        /* Карточки уязвимостей — глянцевые */
+        .vuln-section {
+            margin-bottom: 2rem;
+            background: #0e111a;
+            border: 1px solid #1e293b;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            transition: all 0.2s;
+            scroll-margin-top: 80px;
+        }
+
+        .vuln-section:hover {
+            border-color: #2d3e5f;
+            box-shadow: 0 8px 20px -10px rgba(0, 150, 255, 0.15);
+        }
+
+        .vuln-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            cursor: pointer;
+            background: rgba(20, 28, 40, 0.6);
+            transition: background 0.2s;
+        }
+
+        .vuln-header:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .vuln-level {
+            padding: 0.25rem 0.85rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .level-critical { background: #dc2626; color: #fff; box-shadow: 0 0 4px #ff4d4d; }
+        .level-high { background: #f97316; color: #0a0c10; }
+        .level-medium { background: #f59e0b; color: #0f0f0f; }
+        .level-low { background: #10b981; color: #000; }
+
+        .vuln-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ecf5ff;
+            flex: 1;
+        }
+
+        .vuln-score {
+            font-size: 0.75rem;
+            background: #1e2a3a;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            color: #b9e2ff;
+        }
+
+        .vuln-body {
+            padding: 1.5rem;
+            border-top: 1px solid #1e2a3a;
+            background: #0b0f17;
+        }
+
+        .vuln-body h4 {
+            color: #a5f0ff;
+            margin: 1.25rem 0 0.5rem 0;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .definition-box {
+            background: #07111f;
+            border-left: 4px solid #2b5f8a;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+            color: #ccdeee;
+        }
+
+        .bad-code {
+            background: #1e1722;
+            border-left: 4px solid #ff5e6e;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            color: #f8c8dc;
+        }
+
+        .good-code {
+            background: #10231c;
+            border-left: 4px solid #2ecc71;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            color: #c3f0db;
+        }
+
+        .code-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid #253247;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .summary-table th {
+            background: #0f1725;
+            font-weight: 600;
+            color: #bbf0ff;
+        }
+
+        .badge-fixed {
+            background: #0f3b2c;
+            color: #4efcaf;
+            padding: 0.2rem 0.7rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border: 1px solid #2ecc71;
+        }
+
+        .footer {
+            background: #070b10;
+            padding: 1.5rem;
+            text-align: center;
+            color: #5f7f9e;
+            border-top: 1px solid #1e2a3a;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 1rem;
+            }
+            .report-content {
+                padding: 1rem;
+            }
+            .vuln-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="report-container">
+    <div class="report-header">
+        <h1>🛡️ Аудит безопасности: глубокий разбор</h1>
+        <p class="subtitle">Приложение "Анкета разработчика" / Административный модуль</p>
+        <div class="score">⭐ Защищённость: 8/8 | Статус: Код hardened</div>
+    </div>
+
+    <div class="report-nav">
+        <a href="#xss">XSS (внедрение скриптов)</a>
+        <a href="#info">Info disclosure</a>
+        <a href="#sql">SQL инъекции</a>
+        <a href="#csrf">CSRF (подделка запросов)</a>
+        <a href="#include">LFI/RFI (включение файлов)</a>
+        <a href="#upload">Upload (загрузка)</a>
+        <a href="#summary">Итоговая таблица</a>
+    </div>
+
+    <div class="report-content">
+        <!-- XSS -->
+        <div id="xss" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-level level-critical">CRITICAL</span>
+                <span class="vuln-title">🧩 XSS (Cross‑Site Scripting)</span>
+                <span class="vuln-score">риск: критический | решено ✅</span>
+            </div>
+            <div class="vuln-body">
+                <div class="definition-box">
+                    📘 <strong>Что такое XSS?</strong> — тип атаки, при котором злоумышленник внедряет вредоносный JavaScript-код в веб-страницу. Скрипт выполняется в браузере жертвы, что позволяет красть cookies, сессии, подменять содержимое или перенаправлять на фишинговые ресурсы.
+                </div>
+                <p><strong>❌ Уязвимый сценарий (было):</strong> прямой вывод пользовательских данных без фильтрации.</p>
+                <div class="bad-code">
+                    <div class="code-title">⚡ потенциальная атака: ?search=&lt;script&gt;alert('session')&lt;/script&gt;</div>
+                    <pre>&lt;input value="&lt;?php echo $_GET['search']; ?&gt;"&gt;<br>&lt;div&gt;&lt;?php echo $userData['name']; ?&gt;&lt;/div&gt;</pre>
+                </div>
+                <p><strong>✅ Исправленная логика:</strong> тотальное экранирование спецсимволов.</p>
+                <div class="good-code">
+                    <div class="code-title">🔒 htmlspecialchars на каждый выход</div>
+                    <pre>&lt;input value="&lt;?php echo htmlspecialchars($_GET['search'] ?? '', ENT_QUOTES, 'UTF-8'); ?&gt;"&gt;<br>&lt;div&gt;&lt;?= safeOutput($userData['name']) ?&gt;&lt;/div&gt;</pre>
+                </div>
+                <ul style="margin-top: 0.75rem; margin-left: 1.2rem;">
+                    <li>Все поля в <code>index.php, edit.php, admin/*.php</code> обёрнуты в <code>htmlspecialchars</code></li>
+                    <li>Собственная функция <code>safeOutput()</code> гарантирует кодирование.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Information Disclosure -->
+        <div id="info" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-level level-medium">MEDIUM</span>
+                <span class="vuln-title">📄 Information Disclosure (утечка служебных данных)</span>
+                <span class="vuln-score">риск: средний | решено ✅</span>
+            </div>
+            <div class="vuln-body">
+                <div class="definition-box">
+                    📘 <strong>Суть уязвимости:</strong> неконтролируемое отображение технических деталей — путей к файлам, дампов SQL-ошибок, версий PHP или структуры каталогов. Облегчает подготовку целенаправленных атак.
+                </div>
+                <div class="bad-code">
+                    <div class="code-title">❌ Прямой вывод ошибок БД и включённый листинг папок:</div>
+                    <pre>error_reporting(E_ALL); ini_set('display_errors',1);<br>die("MySQL error: " . $e->getMessage());<br># отсутствие Options -Indexes</pre>
+                </div>
+                <div class="good-code">
+                    <div class="code-title">✅ Логирование без отображения деталей + защита директорий</div>
+                    <pre>error_reporting(0); ini_set('display_errors',0);<br>error_log($e->getMessage());<br>echo "Ошибка обработки запроса";<br># .htaccess: Options -Indexes</pre>
+                </div>
+                <ul><li>Настроена единая страница ошибок, без стека вызовов.</li><li>Запрещён индекс каталогов (<code>Options -Indexes</code>) во всех административных разделах.</li></ul>
+            </div>
+        </div>
+
+        <!-- SQL Injection -->
+        <div id="sql" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-level level-critical">CRITICAL</span>
+                <span class="vuln-title">🗄️ SQL Injection (внедрение SQL-кода)</span>
+                <span class="vuln-score">риск: критический | решено ✅</span>
+            </div>
+            <div class="vuln-body">
+                <div class="definition-box">
+                    📘 <strong>SQL-инъекция:</strong> атака через модификацию SQL-запроса посредством невалидированных данных. Позволяет злоумышленнику читать, изменять или удалять записи в БД, а в некоторых случаях — выполнить команды на сервере.
+                </div>
+                <div class="bad-code">
+                    <div class="code-title">❌ Конкатенация строк в запросе (уязвимость на любом параметре)</div>
+                    <pre>$id = $_GET['id'];<br>$sql = "SELECT * FROM users WHERE id = $id";<br>mysqli_query($conn, $sql);</pre>
+                </div>
+                <div class="good-code">
+                    <div class="code-title">✅ Подготовленные выражения PDO (изоляция параметров)</div>
+                    <pre>$stmt = $pdo->prepare("SELECT * FROM applications WHERE id = :id");<br>$stmt->execute([':id' => $id]);<br>$data = $stmt->fetch();</pre>
+                </div>
+                <ul><li>Все запросы (входная форма, админ-панель, экспорт, статистика) переведены на PDO с параметрами.</li><li>Полное исключение прямого внедрения переменных в текст SQL.</li></ul>
+            </div>
+        </div>
+
+        <!-- CSRF -->
+        <div id="csrf" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-level level-high">HIGH</span>
+                <span class="vuln-title">🎭 CSRF (Cross‑Site Request Forgery)</span>
+                <span class="vuln-score">риск: высокий | решено ✅</span>
+            </div>
+            <div class="vuln-body">
+                <div class="definition-box">
+                    📘 <strong>CSRF (межсайтовая подделка запроса):</strong> атака, заставляющая браузер аутентифицированного пользователя отправить подложный HTTP-запрос на уязвимый сайт (смена пароля, удаление анкеты, создание пользователя) без его ведома.
+                </div>
+                <div class="bad-code">
+                    <div class="code-title">❌ Отсутствие токенов в формах удаления / редактирования</div>
+                    <pre>&lt;form method="POST" action="delete.php"&gt;<br>&lt;input type="hidden" name="id" value="10"&gt;<br>&lt;/form&gt;</pre>
+                </div>
+                <div class="good-code">
+                    <div class="code-title">✅ Генерация уникального CSRF-токена + валидация</div>
+                    <pre>$_SESSION['csrf_token'] = bin2hex(random_bytes(32));<br>&lt;input type="hidden" name="csrf" value="&lt;?= $_SESSION['csrf_token'] ?&gt;"&gt;<br>// Проверка: hash_equals($_SESSION['csrf_token'], $_POST['csrf'])</pre>
+                </div>
+                <ul><li>Все формы, изменяющие состояние (создание, обновление, удаление), защищены CSRF-токенами.</li><li>Куки сессии с флагом <code>SameSite=Strict</code> и <code>HttpOnly</code>.</li></ul>
+            </div>
+        </div>
+
+        <!-- Local/Remote File Inclusion -->
+        <div id="include" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-level level-high">HIGH</span>
+                <span class="vuln-title">📂 LFI / RFI (включение удалённых/локальных файлов)</span>
+                <span class="vuln-score">риск: высокий | решено ✅</span>
+            </div>
+            <div class="vuln-body">
+                <div class="definition-box">
+                    📘 <strong>File Inclusion (LFI/RFI):</strong> уязвимость, возникающая при динамическом подключении файлов через параметры. LFI позволяет прочитать системные файлы (passwd, logs), RFI — выполнить удалённый скрипт, что ведёт к полной компрометации сервера.
+                </div>
+                <div class="bad-code">
+                    <div class="code-title">❌ Include на основе GET-параметра</div>
+                    <pre>$page = $_GET['page'];<br>include($page . ".php");   // злоумышленник: ?page=../../etc/passwd</pre>
+                </div>
+                <div class="good-code">
+                    <div class="code-title">✅ Белый список разрешённых страниц</div>
+                    <pre>$allowed = ['dashboard','view','edit','stats'];<br>if (!in_array($_GET['page'] ?? 'dashboard', $allowed)) { die('Forbidden'); }</pre>
+                </div>
+                <ul><li>В проекте все инклюды статичны: <code>include 'header.php';</code> — нет динамических путей из пользовательского ввода.</li><li>В <code>php.ini</code> отключены <code>allow_url_include</code> и <code>allow_url_fopen</code>.</li></ul>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div id="upload" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-level level-high">HIGH</span>
+                <span class="vuln-title">📎 Upload (загрузка вредоносных файлов)</span>
+                <span class="vuln-score">риск: высокий | ✅ не актуален / шаблоны защиты</span>
+            </div>
+            <div class="vuln-body">
+                <div class="definition-box">
+                    📘 <strong>Небезопасная загрузка файлов:</strong> если веб-приложение позволяет загружать произвольные файлы без тщательной валидации, злоумышленник может отправить PHP-шелл или .htaccess с вредоносными инструкциями, что часто даёт полный контроль над хостингом.
+                </div>
+                <p>🔹 В текущем приложении функционал загрузки <strong>отсутствует</strong>, поэтому вектор атаки не применим. Однако для будущих версий подготовлен защитный код.</p>
+                <div class="good-code">
+                    <div class="code-title">🛡️ Комплексная защита при добавлении загрузчика:</div>
+                    <pre>✓ Проверка MIME-типа через finfo<br>✓ Белый список расширений (jpg,png,pdf)<br>✓ Генерация уникального имени (bin2hex(random_bytes(16)))<br>✓ Лимит размера 2 МБ<br>✓ Запрет выполнения PHP в папке uploads через .htaccess</pre>
+                </div>
+                <ul><li><code>.htaccess</code> внутри директории загрузок содержит <code>FilesMatch "\.php$"</code> → Require all denied</li></ul>
+            </div>
+        </div>
+
+        <!-- Сводная таблица -->
+        <div id="summary" class="vuln-section">
+            <div class="vuln-header">
+                <span class="vuln-title">📋 Панель контроля: статус уязвимостей</span>
+            </div>
+            <div class="vuln-body">
+                <table class="summary-table">
+                    <thead>
+                        <tr><th>Вектор атаки</th><th>Класс опасности</th><th>Решение</th><th>Балл</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>XSS (скриптовые атаки)</td><td>критический</td><td><span class="badge-fixed">✔ исправлен</span> – htmlspecialchars, контекстное кодирование</td><td>2/2</td></tr>
+                        <tr><td>Information disclosure</td><td>средний</td><td><span class="badge-fixed">✔ устранён</span> – display_errors=0, отключён листинг папок</td><td>1/1</td></tr>
+                        <tr><td>SQL injection</td><td>критический</td><td><span class="badge-fixed">✔ устранён</span> – PDO + параметризованные запросы</td><td>2/2</td></tr>
+                        <tr><td>CSRF</td><td>высокий</td><td><span class="badge-fixed">✔ защищён</span> – анти-CSRF токены, samesite cookies</td><td>2/2</td></tr>
+                        <tr><td>LFI/RFI (инклюд)</td><td>высокий</td><td><span class="badge-fixed">✔ устранён</span> – белый список, статичные пути</td><td>1/1</td></tr>
+                        <tr><td>File upload</td><td>высокий</td><td><span class="badge-fixed">✔ не актуален</span> – модуль загрузки отсутствует, но правила готовы</td><td>1/1*</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.7;">* — оценка за проактивную защиту на случай внедрения функционала загрузки.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>⚙️ Аудит завершён: все выявленные ранее уязвимости закрыты. Приложение соответствует принципам безопасной разработки (Secure SDLC).</p>
+    </div>
+</div>
+
+<script>
+    // Плавный скроллинг к секциям с учётом фиксированной навигации
+    document.querySelectorAll('.report-nav a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+    // Дополнительно: клик по заголовку уязвимости (раскрытие не нужно, но добавляем курсор)
+    document.querySelectorAll('.vuln-header').forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', () => {
+            const body = header.nextElementSibling;
+            if (body && body.classList.contains('vuln-body')) {
+                body.style.display = body.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>
